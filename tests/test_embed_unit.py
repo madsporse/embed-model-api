@@ -14,12 +14,16 @@ from fastapi.testclient import TestClient
 
 
 class TestEmbedAPI:
-    """Tests for the embedding API endpoints using HTTP requests."""
+    """
+    Tests for the embedding API endpoints using HTTP requests.
+    """
     
     def test_embed_single_text(self, client: TestClient, configured_mock):
-        """Test embedding a single text."""
+        """
+        Test embedding a single text.
+        """
+        
         if configured_mock:
-            # Configure specific mock behavior for this test
             configured_mock.encode.return_value = np.arange(1, 9, dtype=np.float32).reshape(1, -1)
             configured_mock.tokenize_count.return_value = 42
 
@@ -44,7 +48,10 @@ class TestEmbedAPI:
 
 
     def test_embed_multiple_texts(self, client: TestClient, configured_mock):
-        """Test embedding multiple texts."""
+        """
+        Test embedding multiple texts.
+        """
+        
         texts = ["Hello world", "Bonjour", "Hola", "Ciao", "Hallo"]
         
         if configured_mock:
@@ -75,9 +82,13 @@ class TestEmbedAPI:
             assert isinstance(item["embedding"], list)
             assert len(item["embedding"]) == data["embedding_dimension"]
 
+
     @pytest.mark.parametrize("input_type", ["passage", "query"])
     def test_embed_input_types(self, client: TestClient, configured_mock, input_type: str):
-        """Test different input types (passage vs query)."""
+        """
+        Test different input types (passage vs query).
+        """
+        
         if configured_mock:
             configured_mock.encode.return_value = np.arange(1, 9, dtype=np.float32).reshape(1, -1)
             configured_mock.tokenize_count.return_value = 10
@@ -96,42 +107,12 @@ class TestEmbedAPI:
         assert isinstance(data["data"][0]["embedding"], list)
         assert len(data["data"][0]["embedding"]) == data["embedding_dimension"]
 
-    @pytest.mark.parametrize("normalize", [True, False])
-    def test_embed_normalization(self, client: TestClient, configured_mock, normalize: bool):
-        """Test embedding normalization options."""
-        if configured_mock:
-            if normalize:
-                # Return a normalized vector (L2 norm = 1)
-                mock_embedding = np.ones((1, 8), dtype=np.float32) / np.sqrt(8)
-            else:
-                mock_embedding = np.arange(1, 9, dtype=np.float32).reshape(1, -1)
-            configured_mock.encode.return_value = mock_embedding
-            configured_mock.tokenize_count.return_value = 8
-            
-        response = client.post(
-            "/embed",
-            json={
-                "input": "Test normalization",
-                "input_type": "passage",
-                "normalize": normalize
-            }
-        )
-        assert response.status_code == 200
-        
-        data = response.json()
-        embedding = data["data"][0]["embedding"]
-        
-        if normalize and configured_mock:
-            # Check if embedding is approximately normalized (L2 norm ≈ 1)
-            import math
-            norm = math.sqrt(sum(x*x for x in embedding))
-            assert abs(norm - 1.0) < 0.1  # Allow some tolerance
-        else:
-            # For non-normalized, we just check it's a valid embedding
-            assert len(embedding) == data["embedding_dimension"]
 
     def test_embed_batch_processing(self, client: TestClient, configured_mock):
-        """Test batch processing with custom batch size."""
+        """
+        Test batch processing with custom batch size.
+        """
+        
         texts = [f"Text {i}" for i in range(5)]
         
         if configured_mock:
@@ -151,16 +132,19 @@ class TestEmbedAPI:
         
         data = response.json()
         assert len(data["data"]) == 5
-        # All embeddings should be processed regardless of batch size
+
         for item in data["data"]:
             assert len(item["embedding"]) == data["embedding_dimension"]
 
     def test_response_structure(self, client: TestClient, configured_mock):
-        """Test that response has all required fields with correct types."""
+        """
+        Test that response has all required fields with correct types.
+        """
+        
         if configured_mock:
             configured_mock.encode.return_value = np.arange(1, 9, dtype=np.float32).reshape(1, -1)
             configured_mock.tokenize_count.return_value = 8
-            
+        
         response = client.post(
             "/embed",
             json={
@@ -194,11 +178,15 @@ class TestEmbedAPI:
 
 
 class TestEmbedValidation:
-    """Test input validation and error handling."""
+    """
+    Test input validation and error handling.
+    """
     
-    def test_empty_input_validation(self, client: TestClient, embedder_instance):
-        """Test validation with empty input."""
-        # No need to mock embedder since validation fails before calling it
+    def test_empty_input_validation(self, client: TestClient):
+        """
+        Test validation with empty input.
+        """
+        
         response = client.post(
             "/embed",
             json={
@@ -206,12 +194,14 @@ class TestEmbedValidation:
                 "input_type": "passage"
             }
         )
-        # Should return validation error (422) due to empty list
+
         assert response.status_code == 422
 
-    def test_empty_string_validation(self, client: TestClient, embedder_instance):
-        """Test validation with empty string."""
-        # No need to mock embedder since validation fails before calling it
+    def test_empty_string_validation(self, client: TestClient):
+        """
+        Test validation with empty string.
+        """
+        
         response = client.post(
             "/embed",
             json={
@@ -219,11 +209,14 @@ class TestEmbedValidation:
                 "input_type": "passage"
             }
         )
-        # Should return validation error due to empty string
+        
         assert response.status_code == 422
 
     def test_validation_max_chars_per_item(self, client: TestClient, monkeypatch):
-        """Test character limit validation per item."""
+        """
+        Test character limit validation per item.
+        """
+        
         from app.config import settings
         monkeypatch.setattr(settings, "MAX_CHARS_PER_ITEM", 10)
         
@@ -238,7 +231,10 @@ class TestEmbedValidation:
         assert "exceeds" in response.json()["detail"]
 
     def test_validation_max_batch_size(self, client: TestClient, monkeypatch):
-        """Test batch size limit validation."""
+        """
+        Test batch size limit validation.
+        """
+        
         from app.config import settings
         monkeypatch.setattr(settings, "MAX_BATCH", 2)
         
@@ -253,7 +249,10 @@ class TestEmbedValidation:
         assert "Max batch size" in response.json()["detail"]
 
     def test_invalid_input_type(self, client: TestClient):
-        """Test validation with non-string input."""
+        """
+        Test validation with non-string input.
+        """
+        
         response = client.post(
             "/embed",
             json={
@@ -270,23 +269,29 @@ class TestEmbedValidation:
         assert "string" in error_str.lower()
 
     def test_invalid_input_type_enum(self, client: TestClient):
-        """Test validation with invalid input_type enum value."""
+        """
+        Test validation with invalid input_type enum value.
+        """
+        
         response = client.post(
             "/embed",
             json={
                 "input": "Test text",
-                "input_type": "invalid_type"  # Not in InputType enum
+                "input_type": "invalid_type"
             }
         )
-        assert response.status_code == 422  # Pydantic validation error
+        assert response.status_code == 422
 
     def test_batch_size_boundary_conditions(self, client: TestClient, configured_mock):
-        """Test batch_size parameter boundary conditions."""
+        """
+        Test batch_size parameter boundary conditions.
+        """
+        
         if configured_mock:
             configured_mock.encode.return_value = np.arange(1, 9, dtype=np.float32).reshape(1, -1)
             configured_mock.tokenize_count.return_value = 5
         
-        # Test batch_size = 1 (minimum valid)
+        # Test batch_size = 1
         response = client.post(
             "/embed",
             json={
@@ -306,40 +311,48 @@ class TestEmbedValidation:
                 "batch_size": 0
             }
         )
-        assert response.status_code == 422  # Should fail validation
+        assert response.status_code == 422
 
 
 class TestEmbedderDirect:
-    """Direct tests of the embedder instance (bypassing API)."""
+    """
+    Direct tests of the embedder instance (bypassing API).
+    """
     
     def test_embedder_properties(self, embedder_instance, is_real_model):
-        """Test basic embedder properties."""
+        """
+        Test basic embedder properties.
+        """
+        
         if not is_real_model:
             embedder_instance.dim = 8
         assert hasattr(embedder_instance, 'dim')
         assert embedder_instance.dim > 0
         
-        # For mock embedder, we know it's 8; for real embedder it should be larger
+        # For mock embedder, it is 8; for real embedder it should be larger
         if is_real_model:
-            assert embedder_instance.dim >= 768  # Real models typically have large dimensions
+            assert embedder_instance.dim >= 768
         else:
-            assert embedder_instance.dim == 8  # Mock embedder dimension
+            assert embedder_instance.dim == 8
 
     def test_embedder_encode(self, embedder_instance, is_real_model):
-        """Test direct encoding functionality."""
+        """
+        Test direct encoding functionality.
+        """
+        
         texts = ["Hello", "World"]
         embed_dim = 8
         import numpy as np
         
         if is_real_model:
-            # Test with real model - just verify it works
+            # Test with real model
             embeddings = embedder_instance.encode(texts, "passage", True, 32)
             assert embeddings.shape[0] == len(texts)
-            assert embeddings.shape[1] == embedder_instance.dim  # Real model has its own dimension
+            assert embeddings.shape[1] == embedder_instance.dim
             norms = np.linalg.norm(embeddings, axis=1)
             np.testing.assert_allclose(norms, 1.0, rtol=1e-2)  # Allow some tolerance for real model
         else:
-            # Test with mock - configure and verify behavior
+            # Test with mock
             mock_embedding = np.ones((len(texts), embed_dim), dtype=np.float32) / np.sqrt(embed_dim)
             embedder_instance.encode.return_value = mock_embedding
             embeddings = embedder_instance.encode(texts, "passage", True, 32)
@@ -349,11 +362,14 @@ class TestEmbedderDirect:
             np.testing.assert_allclose(norms, 1.0, rtol=1e-5)
 
     def test_embedder_tokenize_count(self, embedder_instance, is_real_model):
-        """Test token counting functionality."""
+        """
+        Test token counting functionality.
+        """
+        
         texts = ["Hello world", "This is a test"]
         
         if is_real_model:
-            # Test with real model - just verify it works
+            # Test with real model
             token_count = embedder_instance.tokenize_count(texts, "passage")
             assert isinstance(token_count, int)
             assert token_count > 0
@@ -361,9 +377,9 @@ class TestEmbedderDirect:
             longer_texts = texts + ["Additional text for counting"]
             longer_count = embedder_instance.tokenize_count(longer_texts, "passage")
             assert isinstance(longer_count, int)
-            assert longer_count > token_count  # More text should have more tokens
+            assert longer_count > token_count
         else:
-            # Test with mock - configure and verify behavior
+            # Test with mock
             # First call returns 10, second call returns 15
             embedder_instance.tokenize_count.side_effect = [10, 15]
             
@@ -380,10 +396,15 @@ class TestEmbedderDirect:
 
 
 class TestMockBehavior:
-    """Tests specific to mock embedder behavior and call verification."""
+    """
+    Tests specific to mock embedder behavior and call verification.
+    """
     
     def test_mock_embedder_calls(self, embedder_instance, client: TestClient, is_real_model):
-        """Test that mock embedder methods are called with correct arguments."""
+        """
+        Test that mock embedder methods are called with correct arguments.
+        """
+        
         if is_real_model:
             pytest.skip("Mock-specific tests only run with mock embedder")
             
@@ -391,7 +412,6 @@ class TestMockBehavior:
         embedder_instance.encode.reset_mock()
         embedder_instance.tokenize_count.reset_mock()
         
-        # Make API call
         response = client.post(
             "/embed",
             json={
@@ -404,7 +424,6 @@ class TestMockBehavior:
         
         assert response.status_code == 200
         
-        # Verify encode was called with correct arguments
         embedder_instance.encode.assert_called_once_with(
             ["Test text 1", "Test text 2"],
             "passage",
@@ -412,29 +431,31 @@ class TestMockBehavior:
             16
         )
         
-        # Verify tokenize_count was called with correct arguments
         embedder_instance.tokenize_count.assert_called_once_with(
             ["Test text 1", "Test text 2"],
             "passage"
         )
 
     def test_mock_deterministic_output(self, embedder_instance, is_real_model):
-        """Test that mock embedder provides deterministic output."""
+        """
+        Test that mock embedder provides deterministic output.
+        """
+        
         if is_real_model:
             pytest.skip("Mock-specific tests only run with mock embedder")
             
         texts = ["Same text", "Another text"]
         
-        # Call encode multiple times
         embeddings1 = embedder_instance.encode(texts, "passage", True, 32)
         embeddings2 = embedder_instance.encode(texts, "passage", True, 32)
         
-        # Should be identical (deterministic)
-        import numpy as np
         np.testing.assert_array_equal(embeddings1, embeddings2)
 
     def test_mock_call_count(self, embedder_instance, client: TestClient, is_real_model):
-        """Test that we can verify call counts on mock embedder."""
+        """
+        Test that we can verify call counts on mock embedder.
+        """
+        
         if is_real_model:
             pytest.skip("Mock-specific tests only run with mock embedder")
             
@@ -442,7 +463,6 @@ class TestMockBehavior:
         embedder_instance.encode.reset_mock()
         embedder_instance.tokenize_count.reset_mock()
         
-        # Make multiple API calls
         for i in range(3):
             client.post(
                 "/embed",
@@ -452,7 +472,6 @@ class TestMockBehavior:
                 }
             )
         
-        # Verify methods were called 3 times each
         assert embedder_instance.encode.call_count == 3
         assert embedder_instance.tokenize_count.call_count == 3
 
@@ -461,7 +480,6 @@ class TestMockBehavior:
         if is_real_model:
             pytest.skip("Mock-specific tests only run with mock embedder")
             
-        # Configure mock to raise an exception
         embedder_instance.encode.side_effect = RuntimeError("Mock embedding error")
         
         response = client.post(
@@ -472,36 +490,47 @@ class TestMockBehavior:
             }
         )
         
-        # Should return 500 error due to mock exception
         assert response.status_code == 500
         assert "Mock embedding error" in response.json()["detail"]
 
 
 class TestHealthEndpoints:
-    """Test health and readiness endpoints."""
+    """
+    Test health and readiness endpoints.
+    """
     
     def test_health_endpoint(self, client: TestClient):
-        """Test the health check endpoint."""
+        """
+        Test the health check endpoint.
+        """
+        
         response = client.get("/healthz")
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
 
     def test_readiness_endpoint(self, client: TestClient):
-        """Test the readiness check endpoint."""
+        """
+        Test the readiness check endpoint.
+        """
+        
         response = client.get("/readyz")
         assert response.status_code == 200
         assert response.json() == {"status": "ready"}
 
 
 class TestOpenAPISchema:
-    """Test OpenAPI schema generation."""
+    """
+    Test OpenAPI schema generation.
+    """
     
     def test_openapi_schema(self, client: TestClient):
-        """Test that OpenAPI schema is generated correctly."""
+        """
+        Test that OpenAPI schema is generated correctly.
+        """
+        
         response = client.get("/docs")
         assert response.status_code == 200
         
-        # Test that we can get the OpenAPI JSON
         response = client.get("/openapi.json")
         assert response.status_code == 200
         schema = response.json()

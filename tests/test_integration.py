@@ -13,6 +13,7 @@ import requests
 import subprocess
 import time
 import os
+import numpy as np
 
 
 @pytest.mark.integration
@@ -26,7 +27,6 @@ def test_container_smoke():
     tag = "embed-test:latest"
     
     try:
-        # Build Docker image
         print("Building Docker image...")
         result = subprocess.run(
             ["docker", "build", "-t", tag, "."],
@@ -38,7 +38,6 @@ def test_container_smoke():
         if result.returncode != 0:
             pytest.skip(f"Docker build failed: {result.stderr}")
         
-        # Start container
         print("Starting container...")
         process = subprocess.Popen(
             ["docker", "run", "--rm", "-p", "8001:8000", tag],
@@ -48,7 +47,7 @@ def test_container_smoke():
         
         try:
             # Wait for server to start (max 60 seconds)
-            for attempt in range(60):
+            for _ in range(60):
                 try:
                     response = requests.get("http://localhost:8001/healthz", timeout=2)
                     if response.status_code == 200:
@@ -112,12 +111,9 @@ class TestRealModelSpecific:
         """Test that the model produces consistent embeddings for the same input."""
         text = "Consistency test text"
         
-        # Generate embeddings twice
         embeddings1 = embedder_instance.encode([text], "passage", True, 32)
         embeddings2 = embedder_instance.encode([text], "passage", True, 32)
         
-        # Should be identical (real model should be deterministic)
-        import numpy as np
         np.testing.assert_allclose(embeddings1, embeddings2, rtol=1e-6)
 
     def test_input_type_differences(self, embedder_instance):
@@ -127,8 +123,6 @@ class TestRealModelSpecific:
         query_embedding = embedder_instance.encode([text], "query", True, 32)
         passage_embedding = embedder_instance.encode([text], "passage", True, 32)
         
-        # Should be different due to different prefixes
-        import numpy as np
         assert not np.allclose(query_embedding, passage_embedding, rtol=1e-3)
 
     def test_model_dimension_expectations(self, embedder_instance):
