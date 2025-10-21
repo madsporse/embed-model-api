@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "embedding-api"
+version = "0.1.0"
+description = "API (FastAPI) for creating embeddings using multilingual-e5-large"
+authors = ["madsporse <madsporsepedersen@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.13"
+fastapi = "^0.119.0"
+uvicorn = {extras = ["standard"], version = "^0.38.0"}
+sentence-transformers = "^5.1.1"
+torch = "^2.9.0"
+transformers = "^4.57.1"
+pydantic-settings = "^2.11.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+httpx = "^0.28.1"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
