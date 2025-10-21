@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class InputType(str, Enum):
-    auto = "auto"
     query = "query"
     passage = "passage"
 
