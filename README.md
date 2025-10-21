@@ -17,7 +17,7 @@ embed-model-api/
 ├── models/                      # Local model storage (optional)
 │   └── multilingual-e5-large/
 ├── scripts/                     # Utility scripts
-│   ├── build-docker.sh
+│   ├── build_docker_image.sh
 │   ├── download_model.py
 │   └── run_tests.sh
 ├── tests/                       # Test suite
