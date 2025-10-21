@@ -222,7 +222,12 @@ poetry run pytest --cov=app tests/ --cov-report=html
 - **GET /healthz**: Basic health check
 - **GET /readyz**: Readiness check
 - **GET /docs**: Interactive API documentation
-- **GET /metrics**: Prometheus metrics (if enabled)
+
+### Interactive Documentation
+
+FastAPI automatically generates interactive API documentation that you can access in your browser.
+
+The Swagger UI is available at: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ### Usage Examples
 
