@@ -1,0 +1,54 @@
+{
+  "name": "embedding-api",
+  "image": "mcr.microsoft.com/devcontainers/python:3.13",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/aws-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-extra/features/terraform-ls-asdf:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-extra/features/terraform-asdf:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-extra/features/poetry:2": {
+      "version": "latest"
+    }
+  },
+  "containerEnv": {
+    "SAML2AWS_URL": "https://fs.lundbeck.com/adfs/ls/idpinitiatedsignon.aspx",
+    "SAML2AWS_IDP_PROVIDER": "ADFS",
+    "SAML2AWS_MFA": "Auto",
+    "SAML2AWS_PROFILE": "saml",
+    "AWS_DEFAULT_PROFILE": "saml",
+    "AWS_REGION": "eu-west-1",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "POETRY_VIRTUALENVS_IN_PROJECT": "true",
+    "HF_HOME": "/workspaces/.cache/huggingface",
+    "SENTENCE_TRANSFORMERS_HOME": "/workspaces/.cache/sentence-transformers"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.vscode-pull-request-github",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "tamasfe.even-better-toml",
+        "esbenp.prettier-vscode",
+        "hashicorp.terraform",
+        "streetsidesoftware.code-spell-checker"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+        "python.testing.pytestEnabled": true,
+        "python.analysis.typeCheckingMode": "basic",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/postcreate.sh"
+}
