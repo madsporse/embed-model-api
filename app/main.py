@@ -2,7 +2,6 @@ import time, uuid, logging
 from typing import List
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Depends
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
