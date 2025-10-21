@@ -224,6 +224,63 @@ poetry run pytest --cov=app tests/ --cov-report=html
 - **GET /docs**: Interactive API documentation
 - **GET /metrics**: Prometheus metrics (if enabled)
 
+### Usage Examples
+
+#### Single Text Embedding
+
+```bash
+curl -X POST "http://localhost:8000/embed" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "Hello, world!",
+    "input_type": "passage",
+    "normalize": true
+  }'
+```
+
+#### Multiple Text Embeddings
+
+```bash
+curl -X POST "http://localhost:8000/embed" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": ["Hello, world!", "How are you?", "This is a test."],
+    "input_type": "passage",
+    "normalize": true,
+    "batch_size": 16
+  }'
+```
+
+#### Query Embedding (for search/retrieval)
+
+```bash
+curl -X POST "http://localhost:8000/embed" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "What is machine learning?",
+    "input_type": "query",
+    "normalize": true
+  }'
+```
+
+**Response format:**
+
+```json
+{
+  "model": "intfloat/multilingual-e5-large",
+  "data": [
+    {
+      "index": 0,
+      "embedding": [0.1, -0.2, 0.3, ...]
+    }
+  ],
+  "embedding_dimension": 1024,
+  "usage": {
+    "total_input_tokens": 42
+  }
+}
+```
+
 ## Device Support
 
 The API automatically detects and uses the best available compute device:
