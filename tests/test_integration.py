@@ -5,14 +5,15 @@ These tests verify that the complete deployment pipeline works correctly
 by building and testing the actual Docker container, as well as testing
 real model behavior when available.
 
-Run with: pytest -m integration tests/test_integration.py
+Run with: 
+- pytest -m integration tests/test_integration.py  # Docker tests only
+- pytest -m integration tests/test_integration.py --real-model  # Include real model tests
 """
 
 import pytest
 import requests
 import subprocess
 import time
-import os
 import numpy as np
 
 
@@ -100,15 +101,14 @@ if __name__ == "__main__":
 
 # Real model integration tests that only make sense with real models
 @pytest.mark.integration
-@pytest.mark.skipif(
-    os.getenv("ENABLE_REAL_MODEL_TESTS") != "1",
-    reason="Real model integration tests require ENABLE_REAL_MODEL_TESTS=1"
-)
 class TestRealModelSpecific:
     """Tests specific to real model behavior."""
     
-    def test_model_consistency(self, embedder_instance):
+    def test_model_consistency(self, embedder_instance, use_real_model):
         """Test that the model produces consistent embeddings for the same input."""
+        if not use_real_model:
+            pytest.skip("Real model integration tests require --real-model flag")
+            
         text = "Consistency test text"
         
         embeddings1 = embedder_instance.encode([text], "passage", True, 32)
@@ -116,8 +116,11 @@ class TestRealModelSpecific:
         
         np.testing.assert_allclose(embeddings1, embeddings2, rtol=1e-6)
 
-    def test_input_type_differences(self, embedder_instance):
+    def test_input_type_differences(self, embedder_instance, use_real_model):
         """Test that query and passage prefixes produce different embeddings."""
+        if not use_real_model:
+            pytest.skip("Real model integration tests require --real-model flag")
+            
         text = "What is artificial intelligence?"
         
         query_embedding = embedder_instance.encode([text], "query", True, 32)
@@ -125,7 +128,10 @@ class TestRealModelSpecific:
         
         assert not np.allclose(query_embedding, passage_embedding, rtol=1e-3)
 
-    def test_model_dimension_expectations(self, embedder_instance):
+    def test_model_dimension_expectations(self, embedder_instance, use_real_model):
         """Test that real model has expected dimensions."""
+        if not use_real_model:
+            pytest.skip("Real model integration tests require --real-model flag")
+            
         # E5-large models typically have 1024 dimensions
         assert embedder_instance.dim in [768, 1024], f"Unexpected dimension: {embedder_instance.dim}"
