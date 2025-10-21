@@ -31,9 +31,9 @@ ENV PATH="/app/.venv/bin:$PATH" \
 RUN useradd --create-home --uid 1001 app
 WORKDIR /app
 
-COPY --from=builder --chown=app:app /app/.venv /app/.venv
-COPY --chown=app:app app/ ./app/
 COPY --chown=app:app models/ ./models/
+COPY --chown=app:app app/ ./app/
+COPY --from=builder --chown=app:app /app/.venv /app/.venv
 RUN mkdir -p /app/logs
 
 USER app
