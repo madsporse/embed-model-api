@@ -12,10 +12,6 @@ import pytest
 import numpy as np
 from fastapi.testclient import TestClient
 
-import pytest
-import os
-from fastapi.testclient import TestClient
-
 
 class TestEmbedAPI:
     """Tests for the embedding API endpoints using HTTP requests."""
