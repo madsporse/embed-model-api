@@ -16,7 +16,6 @@ class Settings(BaseSettings):
     MAX_BATCH: int = 128
     MAX_CHARS_PER_ITEM: int = 8000
     DEFAULT_BATCH_SIZE: int = 32
-    CORS_ALLOW_ALL: bool = True
 
     model_config = SettingsConfigDict(env_prefix="EMB_", case_sensitive=False)
 

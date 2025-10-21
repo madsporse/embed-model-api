@@ -57,16 +57,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS setup
-if settings.CORS_ALLOW_ALL:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"]
-    )
-
 
 @app.middleware("http")
 async def add_request_id(request: Request, call_next):
