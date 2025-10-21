@@ -93,6 +93,7 @@ The application uses environment variables with the `EMB_` prefix:
 | `EMB_MAX_CHARS_PER_ITEM` | `8000`                           | Maximum characters per text item  |
 | `EMB_DEFAULT_BATCH_SIZE` | `32`                             | Default batch size for processing |
 | `EMB_CORS_ALLOW_ALL`     | `True`                           | Allow all CORS origins            |
+| `EMB_USE_LOCAL_MODEL`    | `False`                          | Use local model                   |
 
 ## Running Locally
 
@@ -181,9 +182,6 @@ The project includes a unified test suite that can run with either fast mocked e
 
 # All tests with real model
 ./scripts/run_tests.sh all
-
-# Tests with coverage report
-./scripts/run_tests.sh coverage
 
 # Tests with coverage report
 ./scripts/run_tests.sh coverage
