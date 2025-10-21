@@ -50,5 +50,5 @@
       }
     }
   },
-  "postCreateCommand": "bash .devcontainer/postcreate.sh"
+  "postCreateCommand": "bash .devcontainer/post_install.sh"
 }
